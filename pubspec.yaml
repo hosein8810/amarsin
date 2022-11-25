@@ -40,6 +40,7 @@ dependencies:
   fluttertoast: ^8.1.1
   shamsi_date: ^1.0.1
   sqflite: ^2.0.3+1
+  animated_button_bar: ^0.0.2+1
 
 dev_dependencies:
   flutter_test:

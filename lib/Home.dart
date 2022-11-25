@@ -10,6 +10,9 @@ import 'package:untitled2/LoginDataModle.dart';
 import 'package:untitled2/Order.dart';
 import 'package:untitled2/drawer.dart';
 import 'package:http/http.dart' as http;
+import 'package:untitled2/invoice.dart';
+import 'package:untitled2/returned%20report.dart';
+import 'package:untitled2/routePage.dart';
 import 'package:untitled2/scan.dart';
 
 class MainPage extends StatefulWidget {
@@ -172,13 +175,13 @@ class _MainPageState extends State<MainPage> {
         '994032400',
         'برگه مسیر',
         'ic_routepage.png',
-        MaterialPageRoute(builder: (context) => const Scan()),
+        MaterialPageRoute(builder: (context) => const routePage()),
       );
       creatnode(
         '994032150',
         'پیش فاکتور خرید',
         'ic_invoice.png',
-        MaterialPageRoute(builder: (context) => const Scan()),
+        MaterialPageRoute(builder: (context) => const invoice()),
       );
       creatnode(
         '994050200',
@@ -214,7 +217,7 @@ class _MainPageState extends State<MainPage> {
         '994050330',
         'ثبت مرجوعی',
         'ic_returned_report.png',
-        MaterialPageRoute(builder: (context) => const Scan()),
+        MaterialPageRoute(builder: (context) => const returned_report()),
       );
       creatnode(
         '994050400',
