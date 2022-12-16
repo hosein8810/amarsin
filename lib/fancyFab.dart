@@ -2,560 +2,18 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:untitled2/customerModle.dart';
-//import 'package:untitled2/fancyFab.dart';
-//import 'dart:convert';
-
-//import 'package:flutter/foundation.dart';
-//import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:http/http.dart' as http;
 import 'package:untitled2/ProductModle.dart';
-//import 'package:intl/intl.dart' as NumberFormat;
+import 'package:intl/intl.dart' as NumberFormat;
 import 'package:untitled2/add_invoic_done.dart';
 
-class add_invoic extends StatefulWidget {
-  const add_invoic({Key? key}) : super(key: key);
-
-  @override
-  State<add_invoic> createState() => _add_invoicState();
-}
-
-List<OrdDtlModle> ordDtlModleList = [];
-
-String customerName = '';
-//int customerId = 0;
+String c = '';
 bool? bottomSheet;
-List<CustomerModle> customer = [];
-int _customerPage = 1;
-
-class _add_invoicState extends State<add_invoic> {
-  //int page = 1;
-
-  //final controller = ScrollController();
-
-  final _baseUrl = 'https://jsonplaceholder.typicode.com/posts';
-
-  final int _limit = 20;
-
-  bool _isFirstLoadRunning = false;
-  bool _hasNextPage = true;
-
-  bool _isLoadMoreRunning = false;
-
-  List _posts = [];
-
-  void _loadMore() async {
-    if (_hasNextPage == true &&
-        _isFirstLoadRunning == false &&
-        _isLoadMoreRunning == false &&
-        _controller.position.extentAfter < 300) {
-      setState(() {
-        _isLoadMoreRunning = true; // Display a progress indicator at the bottom
-      });
-
-      _customerPage += 1; // Increase _page by 1
-
-      try {
-        final res = await http
-            .get(Uri.parse("$_baseUrl?_page=$_customerPage&_limit=$_limit"));
-
-        final List fetchedPosts = json.decode(res.body);
-        if (fetchedPosts.isNotEmpty) {
-          setState(() {
-            _posts.addAll(fetchedPosts);
-          });
-        } else {
-          setState(() {
-            _hasNextPage = false;
-          });
-        }
-      } catch (err) {
-        if (kDebugMode) {
-          print('Something went wrong!');
-        }
-      }
-
-      setState(() {
-        _isLoadMoreRunning = false;
-      });
-    }
-  }
-
-  void _firstLoad() async {
-    setState(() {
-      _isFirstLoadRunning = true;
-    });
-
-    try {
-      final res = await http
-          .get(Uri.parse("$_baseUrl?_page=$_customerPage&_limit=$_limit"));
-      setState(() {
-        _posts = json.decode(res.body);
-      });
-    } catch (err) {
-      if (kDebugMode) {
-        print('Something went wrong');
-      }
-    }
-
-    setState(() {
-      _isFirstLoadRunning = false;
-    });
-  }
-
-  late ScrollController _controller;
-  @override
-  void initState() {
-    super.initState();
-    _firstLoad();
-    _controller = ScrollController()..addListener(_loadMore);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Jalali jalali = Jalali.now();
-    String selectedDate = Jalali.now().toJalaliDateTime();
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
-        floatingActionButton: FancyFab(),
-        bottomNavigationBar: BottomAppBar(
-          // notchMargin: 5,
-          // shape: CircularNotchedRectangle(),
-          color: Colors.blue,
-          child: TextButton(
-            onPressed: () async {
-              Jalali? picked = await showPersianDatePicker(
-                context: context,
-                initialDate: Jalali.now(),
-                firstDate: Jalali(1385, 8),
-                lastDate: Jalali(1450, 9),
-              );
-              var label = picked?.toJalaliDateTime();
-              if (picked != null && picked != selectedDate) {
-                setState(() {
-                  jalali = picked;
-                  label = picked.toJalaliDateTime();
-                });
-              }
-              print(label);
-            },
-            child: Text(
-              'ارسال',
-              style: TextStyle(fontSize: 20, color: Colors.white),
-            ),
-          ),
-        ),
-        appBar: AppBar(
-          actions: [
-            IconButton(
-              onPressed: () {
-                setState(() {});
-              },
-              icon: Icon(Icons.replay_sharp),
-            )
-          ],
-          title: Text('ثبت سفارش'),
-        ),
-        body: Column(children: [
-          TextButton(
-              child: Text(
-                '${jalali.year}/${jalali.month}/${jalali.day}',
-                style: TextStyle(fontSize: 22, color: Colors.black),
-              ),
-              onPressed: () async {
-                Jalali? picked = await showPersianDatePicker(
-                  context: context,
-                  initialDate: Jalali.now(),
-                  firstDate: Jalali(1385, 8),
-                  lastDate: Jalali.now(),
-                );
-                var label = picked?.toJalaliDateTime();
-                if (picked != null && picked != selectedDate) {
-                  setState(() {
-                    jalali = picked;
-                    label = picked.toJalaliDateTime();
-                  });
-                }
-              }),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Material(
-              elevation: 0,
-              child: SizedBox(
-                height: 50,
-                width: width,
-                child: InkWell(
-                  onTap: () {
-                    bottomSheet = true;
-                    showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(20))),
-                        builder: (context) {
-                          customer.clear();
-                          return SizedBox(
-                              height: height - 50, child: kharidar());
-                        }).then((customerModl) {
-                      setState(() {
-                        productName = customerModl.name;
-                        customerId = customerModl.id;
-                      });
-                    });
-                    //print('objecttttttttttttttttttttttttttttttttttttt');
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.blue, width: 2),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            const Text(
-                              'خریدار',
-                              style: TextStyle(fontSize: 25),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Container(
-                              height: 20,
-                              width: 3,
-                              color: Colors.blue,
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            SizedBox(
-                              width: (width / 3) * 2,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  customerName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.visible,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Icon(Icons.arrow_drop_down),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(),
-                Row(
-                  children: [
-                    Text(
-                      'وضعیت',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    ElevatedButton(onPressed: () {}, child: Text('-'))
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-              child: ListView.builder(
-            itemCount: ordDtlModleList.length,
-            itemBuilder: ((context, index) {
-              return Column(
-                children: [
-                  Divider(),
-                  Text(ordDtlModleList[index].pName),
-                  Text('تعداد ${ordDtlModleList[index].cnt.toString()}'),
-                  Text('آفر ${ordDtlModleList[index].offer.toString()}'),
-                  Text(
-                      'مجموع ${(ordDtlModleList[index].cost * ordDtlModleList[index].cnt).toString()}'),
-                  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          ordDtlModleList.removeWhere((element) => ordDtlModleList[index] == element);
-                        });
-                      },
-                      icon: Icon(Icons.delete))
-                ],
-              );
-            }),
-          )),
-        ]),
-      ),
-    );
-  }
-}
-
-class kharidar extends StatefulWidget {
-  const kharidar({Key? key}) : super(key: key);
-
-  @override
-  State<kharidar> createState() => _kharidarState();
-}
-
-class _kharidarState extends State<kharidar> {
-  final int _limit = 20;
-
-  bool _isFirstLoadRunning = false;
-  bool _hasNextPage = true;
-
-  bool _isLoadMoreRunning = false;
-
-  List _posts = [];
-
-  String value = '';
-
-  void _loadMore() async {
-    if (_hasNextPage == true &&
-        _isFirstLoadRunning == false &&
-        _isLoadMoreRunning == false &&
-        _controller.position.extentAfter < 300) {
-      setState(() {
-        _isLoadMoreRunning = true;
-      });
-
-      _customerPage += 1;
-
-      try {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        int userId = prefs.getInt('userId') ?? 0;
-        int systemId = prefs.getInt('systemId') ?? 0;
-        String urlS = prefs.getString('Url') ?? '';
-        var res = await http.get(Uri.parse(
-            "${urlS}CustomerApi/CustomerSearch?search=$value&centerType=1&page=$_customerPage&lastId=0&Acc_System=$systemId&Acc_Year=12&usrId=$userId"));
-
-        var fetchedPosts = json.decode(res.body);
-        var meta = (fetchedPosts as Map)["Meta"];
-        var data = (fetchedPosts)["Data"]["result"]['SearchResults'];
-        if (meta['errorCode'] == -1)
-        // ignore: curly_braces_in_flow_control_structures
-        if (fetchedPosts.isNotEmpty) {
-          setState(() {
-            for (var dataA in data) {
-              var i = CustomerModle(
-                dataA['Id'],
-                dataA['Name'],
-              );
-              //_posts.addAll(fetchedPosts);
-              customer.add(i);
-              //c.add(i);
-            }
-          });
-        } else {
-          setState(() {
-            _hasNextPage = false;
-          });
-        }
-      } catch (err) {
-        if (kDebugMode) {
-          print('Something went wrong!');
-        }
-      }
-
-      setState(() {
-        _isLoadMoreRunning = false;
-      });
-    }
-  }
-
-  void _firstLoad() async {
-    setState(() {
-      customer.clear();
-      _isFirstLoadRunning = true;
-    });
-
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      int userId = prefs.getInt('userId') ?? 0;
-      int systemId = prefs.getInt('systemId') ?? 0;
-      String urlS = prefs.getString('Url') ?? '';
-      var res = await http.get(Uri.parse(
-          "${urlS}CustomerApi/CustomerSearch?search=$value&centerType=1&page=$_customerPage&lastId=0&Acc_System=$systemId&Acc_Year=12&usrId=$userId"));
-
-      var fetchedPosts = json.decode(res.body);
-      var meta = (fetchedPosts as Map)["Meta"];
-      var data = (fetchedPosts)["Data"]["result"]['SearchResults'];
-      if (meta['errorCode'] == -1)
-      // ignore: curly_braces_in_flow_control_structures
-      if (fetchedPosts.isNotEmpty) {
-        //setState(() {
-        for (var dataA in data) {
-          var i = CustomerModle(
-            dataA['Id'],
-            dataA['Name'],
-          );
-          //_posts.addAll(fetchedPosts);
-          customer.add(i);
-          //c.add(i);
-        }
-        //});
-      } else {
-        setState(() {
-          _hasNextPage = false;
-        });
-      }
-    } catch (err) {
-      if (kDebugMode) {
-        print('Something went wrong');
-      }
-    }
-
-    setState(() {
-      _isFirstLoadRunning = false;
-    });
-  }
-
-  late ScrollController _controller;
-  @override
-  void initState() {
-    super.initState();
-    _firstLoad();
-    _controller = ScrollController()..addListener(_loadMore);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    return Column(
-      //mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: width / 5,
-          height: 3,
-          color: Colors.grey[300],
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            // ignore: prefer_const_literals_to_create_immutables
-            children: [
-              Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Expanded(
-                      child: TextField(
-                    textInputAction: TextInputAction.search,
-                    onChanged: (string) {
-                      customer.clear();
-                      value = string;
-                      setState(() {
-                        _firstLoad();
-                      });
-                    },
-                    onSubmitted: (value) => setState(() {
-                      _firstLoad();
-                    }),
-                  ))),
-              if (_isLoadMoreRunning == true)
-                // ignore: prefer_const_constructors
-                Padding(
-                  padding: const EdgeInsets.only(left: 15.0, right: 8),
-                  child: const Center(
-                    child: SizedBox(
-                      child: CircularProgressIndicator(),
-                      width: 10,
-                      height: 10,
-                    ),
-                  ),
-                ),
-              if (_isLoadMoreRunning == false)
-                // ignore: prefer_const_constructors
-                Padding(
-                  padding: const EdgeInsets.only(left: 15.0, right: 8),
-                  child: const Icon(Icons.search_rounded),
-                ),
-            ],
-          ),
-        ),
-        _isFirstLoadRunning
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: customer.length,
-                  controller: _controller,
-                  itemBuilder: (_, index) => Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: Material(
-                          //color: Colors.black12,
-                          borderRadius: BorderRadius.circular(10),
-                          child: Column(
-                            children: [
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        customerName = customer[index].name;
-                                        bottomSheet = false;
-                                      });
-                                      Navigator.pop(context, customer[index]);
-                                    },
-                                    child: Align(
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          customer[index].name,
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        )),
-                                  ),
-                                ),
-                              ),
-                              const Divider()
-                            ],
-                          ),
-                        )),
-                  ),
-                ),
-              ),
-        if (_hasNextPage == false)
-          Container(
-            padding: const EdgeInsets.only(top: 30, bottom: 40),
-            color: Colors.amber,
-            child: const Center(
-              child: Text('You have fetched all of the content'),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-String productName = '';
-List<ProductModle> products = [];
-int _productPage = 1;
-int productId = 0;
+List<ProductModle> customer = [];
+int _page = 1;
+int i = 0;
 
 class FancyFab extends StatefulWidget {
   @override
@@ -668,11 +126,11 @@ class _FancyFabState extends State<FancyFab>
                   borderRadius:
                       BorderRadius.vertical(top: Radius.circular(20))),
               builder: (context) {
-                products.clear();
+                customer.clear();
                 return SizedBox(height: height - 50, child: Products());
               }).then((value) {
             setState(() {
-              ordDtlModleList.add(value);
+              Navigator.pop(context,value);
             });
           });
         },
@@ -762,7 +220,7 @@ class _ProductsState extends State<Products> {
         _isLoadMoreRunning = true;
       });
 
-      _productPage += 1;
+      _page += 1;
 
       try {
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -771,7 +229,7 @@ class _ProductsState extends State<Products> {
         String urlS = prefs.getString('Url') ?? '';
         var res = await http.get(Uri.parse(
             //http://www.ps.dotis.ir/Api/ProductApi/ProductSearch?UsrId=104&Barcode=&page=1&lastId=0&search=&Acc_System=4&Acc_Year=12&hasStock=false
-            "${urlS}ProductApi/ProductSearch?UsrId=$userId&Barcode=&page=$_productPage&lastId=0&search=$value&Acc_System=4&Acc_Year=12&hasStock=false"));
+            "${urlS}ProductApi/ProductSearch?UsrId=$userId&Barcode=&page=$_page&lastId=0&search=$value&Acc_System=4&Acc_Year=12&hasStock=false"));
 
         var fetchedPosts = json.decode(res.body);
         var meta = (fetchedPosts as Map)["Meta"];
@@ -787,7 +245,7 @@ class _ProductsState extends State<Products> {
                 dataA['Cost'],
               );
               //_posts.addAll(fetchedPosts);
-              products.add(i);
+              customer.add(i);
               //c.add(i);
             }
           });
@@ -810,7 +268,7 @@ class _ProductsState extends State<Products> {
 
   void _firstLoad() async {
     setState(() {
-      products.clear();
+      customer.clear();
       _isFirstLoadRunning = true;
     });
 
@@ -820,7 +278,7 @@ class _ProductsState extends State<Products> {
       int systemId = prefs.getInt('systemId') ?? 0;
       String urlS = prefs.getString('Url') ?? '';
       var res = await http.get(Uri.parse(
-          "${urlS}ProductApi/ProductSearch?UsrId=$userId&Barcode=&page=$_productPage&lastId=0&search=$value&Acc_System=4&Acc_Year=12&hasStock=false"));
+          "${urlS}ProductApi/ProductSearch?UsrId=$userId&Barcode=&page=$_page&lastId=0&search=$value&Acc_System=4&Acc_Year=12&hasStock=false"));
 
       var fetchedPosts = json.decode(res.body);
       var meta = (fetchedPosts as Map)["Meta"];
@@ -836,7 +294,7 @@ class _ProductsState extends State<Products> {
             dataA['Cost'],
           );
           //_posts.addAll(fetchedPosts);
-          products.add(i);
+          customer.add(i);
           //c.add(i);
         }
         //});
@@ -887,7 +345,7 @@ class _ProductsState extends State<Products> {
                       child: TextField(
                     textInputAction: TextInputAction.search,
                     onChanged: (string) {
-                      products.clear();
+                      customer.clear();
                       value = string;
                       setState(() {
                         _firstLoad();
@@ -925,7 +383,7 @@ class _ProductsState extends State<Products> {
             : Expanded(
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: products.length,
+                  itemCount: customer.length,
                   controller: _controller,
                   itemBuilder: (_, index) => Padding(
                     padding:
@@ -943,9 +401,9 @@ class _ProductsState extends State<Products> {
                                   child: InkWell(
                                     onTap: () {
                                       setState(() {
-                                        productName = products[index].name;
-                                        productId = products[index].id;
-                                        cost = products[index].cost;
+                                        c = customer[index].name;
+                                        i = customer[index].id;
+                                        cost = customer[index].cost;
                                       });
                                       showModalBottomSheet(
                                           context: context,
@@ -956,7 +414,7 @@ class _ProductsState extends State<Products> {
                                                       top:
                                                           Radius.circular(20))),
                                           builder: (context) {
-                                            products.clear();
+                                            customer.clear();
                                             return SizedBox(
                                                 height: height - 60,
                                                 child: AddProduct());
@@ -971,7 +429,7 @@ class _ProductsState extends State<Products> {
                                     child: Align(
                                         alignment: Alignment.center,
                                         child: Text(
-                                          products[index].name,
+                                          customer[index].name,
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
                                             fontSize: 16,
@@ -992,7 +450,7 @@ class _ProductsState extends State<Products> {
             padding: const EdgeInsets.only(top: 30, bottom: 40),
             color: Colors.amber,
             child: const Center(
-              child: Text('اخر لیست'),
+              child: Text('You have fetched all of the content'),
             ),
           ),
       ],
@@ -1116,7 +574,7 @@ class _AddProductState extends State<AddProduct> {
                               const SizedBox(
                                 width: 5,
                               ),
-                              Text(productId.toString()),
+                              Text(i.toString()),
                               const SizedBox(
                                 width: 10,
                               ),
@@ -1206,7 +664,7 @@ class _AddProductState extends State<AddProduct> {
                           const SizedBox(
                             width: 5,
                           ),
-                          Text(productName.split(':')[0]),
+                          Text(c.split(':')[0]),
                           const SizedBox(
                             width: 10,
                           ),
@@ -1255,7 +713,7 @@ class _AddProductState extends State<AddProduct> {
                           SizedBox(
                               width: (width / 10) * 8,
                               child: Text(
-                                productName.split(':')[1],
+                                c.split(':')[1],
                                 maxLines: 1,
                                 overflow: TextOverflow.visible,
                               )),
@@ -1638,17 +1096,11 @@ class _AddProductState extends State<AddProduct> {
               child: ElevatedButton(
                   onPressed: () {
                     OrdDtlModle ordDtlModle = OrdDtlModle(
-                        int.parse(cntController.text == ''
-                            ? '0'
-                            : cntController.text),
-                        int.parse(offerController.text == ''
-                            ? '0'
-                            : offerController.text),
-                        int.parse(costController.text == ''
-                            ? '0'
-                            : costController.text),
-                        productId,
-                        productName.split(':')[1]);
+                        int.parse(cntController.text),
+                        int.parse(offerController.text),
+                        int.parse(cntController.text),
+                        i,
+                        c.split(':')[1]);
                     Navigator.pop(context, ordDtlModle);
                   },
                   child: const Text('ثبت کالا')))

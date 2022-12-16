@@ -41,11 +41,11 @@ class _configState extends State<config> {
       child: Scaffold(
         body: Column(
           children: [
-            SizedBox(
+            const SizedBox(
               height: 45,
             ),
             Image.asset('assets\\drawable-hdpi\\Logo.png'),
-            SizedBox(
+            const SizedBox(
               height: 60,
             ),
             Center(
@@ -63,7 +63,7 @@ class _configState extends State<config> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             'خوش آمدید',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20),
@@ -77,41 +77,43 @@ class _configState extends State<config> {
                       ),
                       //SizedBox(height: 10,),
                       Row(
+                        // ignore: prefer_const_literals_to_create_immutables
                         children: [
-                          Text('لطفا برای دسترسی بیشتر ..'),
+                          const Text('لطفا برای دسترسی بیشتر ..'),
                         ],
                       ),
                       Row(
+                        // ignore: prefer_const_literals_to_create_immutables
                         children: [
-                          Text(
+                          const Text(
                             'کد فعال سازی نرم افزار را وارد نمایید.',
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 30,
                       ),
                       SizedBox(
                         height: 45,
                         child: Expanded(
                           child: Material(
+                            elevation: 0,
+                            borderRadius: BorderRadius.circular(40),
                             child: TextField(
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                   border: InputBorder.none,
                                   //counterText: "کد فعال ساز",
                                   hintText: "کد فعال ساز",
                                   icon: Padding(
-                                    padding: const EdgeInsets.only(right: 10),
+                                    padding: EdgeInsets.only(right: 10),
                                     child: Icon(Icons.lock),
                                   )),
                               controller: loginCode,
                             ),
-                            elevation: 0,
-                            borderRadius: BorderRadius.circular(40),
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       SizedBox(
@@ -125,7 +127,7 @@ class _configState extends State<config> {
                             onTap: () {
                               getData(loginCode.text, context);
                             },
-                            child: Container(
+                            child: const SizedBox(
                               height: 70,
                               child: Center(
                                 child: Text(
@@ -177,7 +179,7 @@ class _configState extends State<config> {
           prefs.setInt('MobileAppUrlId', data['MobileAppUrlId']);
           prefs.setString('AppTitle', data['AppTitle']);
           prefs.setString('Url', data['Url']);
-          prefs.setInt('SystemId', data['SystemId']);
+          prefs.setInt('systemId', data['SystemId']);
           InitialSettings_dialog(dataa, prefs, context);
         } else {
           _showToast(context, meta['message']);

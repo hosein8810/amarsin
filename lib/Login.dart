@@ -9,11 +9,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/Home.dart';
 import 'package:untitled2/LoginDataModle.dart';
 
-
-
 class Login extends StatelessWidget {
   final DataModel dataModel;
-   Login({Key? key,required this.dataModel}) : super(key: key);
+  Login({Key? key, required this.dataModel}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +54,7 @@ class Login extends StatelessWidget {
                                     fontWeight: FontWeight.bold, fontSize: 20),
                               ),
                               IconButton(
-                                  onPressed: () {
-                                  },
-                                  icon: Icon(Icons.settings)),
+                                  onPressed: () {}, icon: Icon(Icons.settings)),
                             ],
                           ),
                           //SizedBox(height: 10,),
@@ -74,19 +70,21 @@ class Login extends StatelessWidget {
                             height: 45,
                             child: Expanded(
                               child: Material(
+                                elevation: 0,
+                                borderRadius: BorderRadius.circular(40),
                                 child: TextField(
-                                  decoration: InputDecoration(
+                                  //obscureText: true,
+                                  decoration: const InputDecoration(
                                       border: InputBorder.none,
                                       //counterText: "کد فعال ساز",
                                       hintText: "نام کاربری",
                                       icon: Padding(
-                                        padding: const EdgeInsets.only(right: 10),
-                                        child: Icon(Icons.account_circle_outlined),
+                                        padding: EdgeInsets.only(right: 10),
+                                        child:
+                                            Icon(Icons.account_circle_outlined),
                                       )),
                                   controller: userName,
                                 ),
-                                elevation: 0,
-                                borderRadius: BorderRadius.circular(40),
                               ),
                             ),
                           ),
@@ -127,13 +125,12 @@ class Login extends StatelessWidget {
                               child: InkWell(
                                 onTap: () {
                                   getData(userName.text, pass.text, context);
-
                                 },
                                 child: Container(
                                   height: 70,
                                   child: Center(
                                     child: Text(
-                                      'برسی کد',
+                                      'ورود',
                                       style: TextStyle(
                                           color: Colors.white, fontSize: 20),
                                     ),
@@ -156,32 +153,39 @@ class Login extends StatelessWidget {
     );
   }
 
-  void getData(String userName, String pass, BuildContext context,) async {
-
+  void getData(
+    String userName,
+    String pass,
+    BuildContext context,
+  ) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('userName', userName);
       prefs.setString('pass', pass);
-      var url = '${dataModel.Url}UserApi/login?_userName=${userName}&_pass=${pass}&player_id=0&_customerTyp=9';
+      var url =
+          '${dataModel.Url}UserApi/login?_userName=${userName}&_pass=${pass}&player_id=0&_customerTyp=9';
       http.Response response = await http.get(Uri.parse(url));
-        var dataResponse = json.decode(utf8.decode(response.bodyBytes));
-        var meta = (dataResponse as Map)["Meta"];
-        var data = (dataResponse as Map)["Data"]["result"];
-      if(meta['errorCode'] == -1){
-        var loginDataModel = LoginDataModel(
-            meta['errorCode'], meta['message'], data['Perms'].split(','));
+      var dataResponse = json.decode(utf8.decode(response.bodyBytes));
+      var meta = (dataResponse as Map)["Meta"];
+      var data = (dataResponse as Map)["Data"]["result"];
+      if (meta['errorCode'] == -1) {
+        var loginDataModel = LoginDataModel(meta['errorCode'], meta['message'],
+            data['userId'], data['Perms'].split(','));
         if (loginDataModel.errorCode == -1) {
+          // ignore: use_build_context_synchronously
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                   builder: (BuildContext context) => MainPage(
                         dataModel: dataModel,
                       )));
+          prefs.setInt('userId', loginDataModel.userId);
           prefs.setBool("isLoggedIn", false);
+          prefs.setInt('userId', loginDataModel.userId);
         } else {
           _showToast(context, meta['message']);
         }
-      }else {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -193,7 +197,7 @@ class Login extends StatelessWidget {
           ),
         );
       }
-    }on SocketException catch (e) {
+    } on SocketException catch (e) {
       //var r = e['message'];
       _showToast(context, 'خطا در ارتباط');
     }
@@ -215,4 +219,4 @@ class Login extends StatelessWidget {
       ),
     );
   }
- }
+}

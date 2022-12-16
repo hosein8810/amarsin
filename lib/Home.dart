@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:untitled2/Buttons.dart';
+//import 'package:untitled2/Buttons.dart';
 import 'package:untitled2/DataModle.dart';
 import 'package:untitled2/LoginDataModle.dart';
 import 'package:untitled2/Order.dart';
@@ -70,22 +70,57 @@ class _MainPageState extends State<MainPage> {
                     const SizedBox(
                       height: 20,
                     ),
-                    Expanded(
-                      child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 1.5,
-                          mainAxisSpacing: 20,
-                        ),
-                        itemCount: name.length,
-                        itemBuilder: (context, index) {
-                          return buttons(name[index], context, imagelst[index],
-                              materialPageRoutelst[index]);
-                        },
-                      ),
-                    ),
+                    FutureBuilder(
+                        future: getData(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasData) {
+                            return Expanded(
+                              child: GridView.builder(
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 12,
+                                  childAspectRatio: 1.5,
+                                  mainAxisSpacing: 20,
+                                ),
+                                itemCount: name.length,
+                                itemBuilder: (context, index) {
+                                  return buttons(
+                                      name[index],
+                                      context,
+                                      imagelst[index],
+                                      materialPageRoutelst[index]);
+                                },
+                              ),
+                            );
+                          } else {
+                            return const Center(
+                                child: Text(
+                              'خطا در ارتباط',
+                              style: TextStyle(fontSize: 40),
+                            ));
+                          }
+                        }),
+                    // Expanded(
+                    //   child: GridView.builder(
+                    //     gridDelegate:
+                    //         const SliverGridDelegateWithFixedCrossAxisCount(
+                    //       crossAxisCount: 2,
+                    //       crossAxisSpacing: 12,
+                    //       childAspectRatio: 1.5,
+                    //       mainAxisSpacing: 20,
+                    //     ),
+                    //     itemCount: name.length,
+                    //     itemBuilder: (context, index) {
+                    //       return buttons(name[index], context, imagelst[index],
+                    //           materialPageRoutelst[index]);
+                    //     },
+                    //   ),
+                    // ),
                   ],
                 ))),
         theme: ThemeData(fontFamily: 'sans_bold'),
@@ -93,8 +128,10 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void getData() async {
-    try {
+  Future<List<String>> getData() async {
+    List<String> namee = [];
+    //try {
+    if (name.length == 0) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String userName = prefs.getString(
             'userName',
@@ -104,24 +141,33 @@ class _MainPageState extends State<MainPage> {
             'pass',
           ) ??
           '';
+      String urlS = prefs.getString('Url') ?? '';
       var url =
-          '${dataModel.Url}UserApi/login?_userName=${userName}&_pass=${pass}&player_id=0&_customerTyp=9';
+          '${urlS}UserApi/login?_userName=${userName}&_pass=${pass}&player_id=0&_customerTyp=9';
       http.Response response = await http.get(Uri.parse(url));
-      setState(() {
-        var dataResponse = json.decode(utf8.decode(response.bodyBytes));
-        var meta = (dataResponse as Map)["Meta"];
-        var data = (dataResponse as Map)["Data"]["result"];
-        if (meta['errorCode'] == -1) {
-          var loginDataModel = LoginDataModel(
-              meta['errorCode'], meta['message'], data['Perms'].split(','));
-          if (loginDataModel.errorCode == -1) {
-            Perms = loginDataModel.perms;
-            perms();
-          } else {}
+      var dataResponse = json.decode(utf8.decode(response.bodyBytes));
+      var meta = (dataResponse as Map)["Meta"];
+      var data = (dataResponse as Map)["Data"]["result"];
+      if (meta['errorCode'] == -1) {
+        var loginDataModel = LoginDataModel(meta['errorCode'], meta['message'],
+            data['userId'], data['Perms'].split(','));
+        if (loginDataModel.errorCode == -1) {
+          prefs.setInt('userId', loginDataModel.userId);
+          Perms = loginDataModel.perms;
+          namee = loginDataModel.perms;
+          perms();
         } else {}
-      });
-    } on SocketException catch (e) {}
-
+      } else {}
+      //return namee;
+      return namee;
+    } else {
+      namee = name;
+      return namee;
+    }
+    //} on SocketException catch (e) {
+    //return namee;
+    //}
+    //return namee;
     //var dataResponse = json.decode(utf8.decode(response.bodyBytes));
   }
 
@@ -145,8 +191,10 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  bool perm = true;
   void perms() {
-    setState(() {
+    if (perm) {
+      perm = false;
       creatnode(
         '994032998',
         'ویزیت',
@@ -231,6 +279,56 @@ class _MainPageState extends State<MainPage> {
         'ic_sales_report.png',
         MaterialPageRoute(builder: (context) => const Scan()),
       );
-    });
+    }
+  }
+
+  Row buttons(String name, BuildContext context, String image,
+      MaterialPageRoute materialPageRoute) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Column(
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  Future.delayed(Duration.zero, () {
+                    Navigator.push(context, materialPageRoute);
+                  });
+                });
+              },
+              child: Card(
+                semanticContainer: true,
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                //margin: EdgeInsets.all(60),
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(
+                    width: 1,
+                    color: Colors.blue,
+                  ),
+                  borderRadius: BorderRadius.circular(
+                    1000000,
+                  ), //<-- SEE HERE
+                ),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Expanded(
+                        child: Image.asset(
+                      image,
+                      height: 70,
+                      width: 70,
+                    )),
+                  ),
+                ),
+              ),
+            ),
+            Text(name,
+                style: const TextStyle(fontSize: 18, color: Color(0xFF4E4E4E))),
+          ],
+        ),
+        //Container(color: Colors.blue,width: 10,height: 10,)
+      ],
+    );
   }
 }

@@ -33,7 +33,7 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
+  #cupertino_icons: ^1.0.2
   edge_detection: ^1.0.9
   shared_preferences: ^2.0.15
   http: any
@@ -41,6 +41,22 @@ dependencies:
   shamsi_date: ^1.0.1
   sqflite: ^2.0.3+1
   animated_button_bar: ^0.0.2+1
+  flutter_launcher_icons: ^0.11.0
+  flutter_native_splash: ^2.2.9
+  intl: ^0.17.0
+  persian_datetime_picker: ^2.5.0
+  #flutter_pagination_helper: ^1.0.1
+  #infinite_scroll_pagination: ^3.2.0
+  #flutter_linear_datepicker: ^2.0.4
+
+flutter_native_splash:
+  background_image: "assets\\StartApp.png"
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets\\drawable-hdpi\\Logo.png"
+  min_sdk_android: 21
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +99,8 @@ flutter:
     - assets\drawable-hdpi\ic_person_edt.png
     - assets\drawable-hdpi\ic_settings.png
     - assets\drawable-hdpi\Logo.png
+    - assets\NoImage.png
+    - assets\StartApp.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:untitled2/Home.dart';
 import 'package:untitled2/Login.dart';
 
 import 'DataModle.dart';

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/DataModle.dart';
@@ -11,7 +10,7 @@ late LoginDataModel loginDataModel;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool status = prefs.getBool('isLoggedIn') ?? false;
+  bool status = prefs.getBool('isLoggedIn') ?? true;
   int mobileAppUrlId = prefs.getInt('MobileAppUrlId') ?? 0;
   String appTitle = prefs.getString('AppTitle') ?? '';
   String url = prefs.getString('Url') ?? '';

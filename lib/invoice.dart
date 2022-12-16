@@ -17,20 +17,7 @@ class _invoiceState extends State<invoice> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        // appBar: AppBar(
-        //   centerTitle: true,
-        //   title: Text(' برگه مسیر ها'),
-        //   leading: IconButton(
-        //     icon: Icon(Icons.add),
-        //     onPressed: () {},
-        //   ),
-        //   actions: [
-        //     Directionality(
-        //         textDirection: TextDirection.ltr, child: BackButton(onPressed: (){
-        //       Navigator.pop(context);
-        //     },))
-        //   ],
-        // ),
+
         body: Column(
           children: [
             Container(

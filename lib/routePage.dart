@@ -17,56 +17,12 @@ class _routePageState extends State<routePage> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        // appBar: AppBar(
-        //   centerTitle: true,
-        //   title: Text(' برگه مسیر ها'),
-        //   leading: IconButton(
-        //     icon: Icon(Icons.add),
-        //     onPressed: () {},
-        //   ),
-        //   actions: [
-        //     Directionality(
-        //         textDirection: TextDirection.ltr, child: BackButton(onPressed: (){
-        //       Navigator.pop(context);
-        //     },))
-        //   ],
-        // ),
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(' برگه مسیر ها'),
+        ),
         body: Column(
           children: [
-            Container(
-              height: 60,
-              width: width,
-              color: Colors.blue,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.add,color: Colors.white,size: 35,),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.refresh,color: Colors.white,size: 30,),
-                        onPressed: () {
-                          setState(() {});
-                        },
-                      ),
-                    ],
-                  ),
-                  Center(child: Text('برگه مسیر ها',style: TextStyle(color: Colors.white,fontSize: 20),),),
-                  Row(
-                    children: [
-                      SizedBox(width: 30,),
-                      Directionality(
-                          textDirection: TextDirection.ltr, child: IconButton(onPressed: (){
-                        Navigator.pop(context);
-                      },icon: Icon(Icons.arrow_back,color: Colors.white,size: 30,),)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
             TextButton(
                 child: Text(
                   '${jalali.year}/${jalali.month}/${jalali.day}',
