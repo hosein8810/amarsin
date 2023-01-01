@@ -17,7 +17,6 @@ class Order extends StatefulWidget {
 }
 
 class _OrderState extends State<Order> {
-  
   List<OrderMSTmodle> orderItem = [];
   Jalali jalali = Jalali.now();
   String selectedDate = Jalali.now().toJalaliDateTime();
@@ -52,11 +51,16 @@ class _OrderState extends State<Order> {
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton: FloatingActionButton(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: ((context) => const add_invoic())));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: ((context) => const Add_invoic())));
             },
             child: Icon(Icons.add)),
         appBar: AppBar(
+          actions: [IconButton(onPressed: (){setState(() {
+            
+          });}, icon: Icon(Icons.replay))],
           title: const Text(
             'لیست سفارشات',
             style: TextStyle(color: Colors.white, fontSize: 20),
@@ -93,9 +97,9 @@ class _OrderState extends State<Order> {
                   } else if (snapshot.hasData) {
                     return Expanded(
                       child:
-                      //CustomProgressWidget(),
+                          //CustomProgressWidget(),
 
-                      ListView.builder(
+                          ListView.builder(
                         itemCount: orderItem.length,
                         itemBuilder: (context, index) {
                           return lat(
@@ -103,7 +107,9 @@ class _OrderState extends State<Order> {
                               index,
                               orderItem[index].Date,
                               orderItem[index].SumTotal.toInt(),
-                              orderItem[index].Code);
+                              orderItem[index].Code,
+                              context
+                              );
                         },
                       ),
                     );
@@ -137,31 +143,31 @@ class _OrderState extends State<Order> {
   Future<List<OrderMSTmodle>> getData() async {
     List<OrderMSTmodle> invoicItemGetData = [];
     //try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      int userId = prefs.getInt('userId') ?? 0;
-      int systemId = prefs.getInt('systemId') ?? 0;
-      String urlS = prefs.getString('Url') ?? '';
-      String url =
-          '${urlS}OrderApi/OrderMstList?usrId=$userId&SystemId=$systemId&CustomerId=0&Status=0&Date=${jalali.year}/${jalali.month}/${jalali.day}';
-      http.Response response = await http.get(Uri.parse(url));
-      var dataResponse = json.decode(utf8.decode(response.bodyBytes));
-      var meta = (dataResponse as Map)["Meta"];
-      var data = (dataResponse as Map)["Data"]["result"];
-      if (kDebugMode) {
-        print(url);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int userId = prefs.getInt('userId') ?? 0;
+    int systemId = prefs.getInt('systemId') ?? 0;
+    String urlS = prefs.getString('Url') ?? '';
+    String url =
+        '${urlS}OrderApi/OrderMstList?usrId=$userId&SystemId=$systemId&CustomerId=0&Status=0&Date=${jalali.year}/${jalali.month}/${jalali.day}';
+    http.Response response = await http.get(Uri.parse(url));
+    var dataResponse = json.decode(utf8.decode(response.bodyBytes));
+    var meta = (dataResponse as Map)["Meta"];
+    var data = (dataResponse as Map)["Data"]["result"];
+    if (kDebugMode) {
+      print(url);
+    }
+    if (meta['errorCode'] == -1) {
+      orderItem.clear();
+      for (var dataA in data) {
+        var i = OrderMSTmodle(
+            dataA['CustName'], dataA['Code'], dataA['Date'], dataA['SumTotal']);
+        orderItem.add(i);
+        invoicItemGetData.add(i);
       }
-      if (meta['errorCode'] == -1) {
-        orderItem.clear();
-        for (var dataA in data) {
-          var i = OrderMSTmodle(dataA['CustName'], dataA['Code'], dataA['Date'],
-              dataA['SumTotal']);
-          orderItem.add(i);
-          invoicItemGetData.add(i);
-        }
-        return invoicItemGetData;
-      } else {
-        return invoicItemGetData;
-      }
+      return invoicItemGetData;
+    } else {
+      return invoicItemGetData;
+    }
     //} on SocketException catch (e) {
     //  return invoicItemGetData;
     //}
@@ -178,14 +184,16 @@ BottomNavigationBarItem bottomNavigationBarItem(String label, Icon icon) {
   );
 }
 
-Widget lat(String title, int index, String Date, int SumTotal, String Code) {
+Widget lat(String title, int index, String Date, int SumTotal, String Code,BuildContext context) {
   NumberFormat.NumberFormat myFormat =
       NumberFormat.NumberFormat.decimalPattern('en_us');
-  return Column(
-    children: [
-      const Divider(),
-      Padding(
-        padding: const EdgeInsets.all(8.0),
+  double width = MediaQuery.of(context).size.width;
+
+  return Padding(
+    padding: const EdgeInsets.all(5.0),
+    child: Card(
+      child: Padding(
+        padding: const EdgeInsets.all(9.0),
         child: Column(
           children: [
             Row(
@@ -196,16 +204,23 @@ Widget lat(String title, int index, String Date, int SumTotal, String Code) {
               ],
             ),
             SizedBox(
-              height: 10,
+              height: 15,
             ),
             Row(
               children: [
-                Text(title),
+                SizedBox(
+                  width: width * 0.89,
+                  child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.visible,
+                  ),
+                ),
               ],
             ),
           ],
         ),
       ),
-    ],
+    ),
   );
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -9,20 +10,19 @@ import 'package:untitled2/customerModle.dart';
 //import 'package:untitled2/fancyFab.dart';
 //import 'dart:convert';
 
-//import 'package:flutter/foundation.dart';
 //import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:http/http.dart' as http;
 import 'package:untitled2/ProductModle.dart';
-//import 'package:intl/intl.dart' as NumberFormat;
 import 'package:untitled2/add_invoic_done.dart';
+import 'package:flutter_guid/flutter_guid.dart';
+import 'package:untitled2/qr.dart';
+import 'package:url_launcher/link.dart';
 
-class add_invoic extends StatefulWidget {
-  const add_invoic({Key? key}) : super(key: key);
+class Add_invoic extends StatefulWidget {
+  const Add_invoic({Key? key}) : super(key: key);
 
   @override
-  State<add_invoic> createState() => _add_invoicState();
+  State<Add_invoic> createState() => _Add_invoicState();
 }
 
 List<OrdDtlModle> ordDtlModleList = [];
@@ -32,8 +32,9 @@ String customerName = '';
 bool? bottomSheet;
 List<CustomerModle> customer = [];
 int _customerPage = 1;
+int customerId = 0;
 
-class _add_invoicState extends State<add_invoic> {
+class _Add_invoicState extends State<Add_invoic> {
   //int page = 1;
 
   //final controller = ScrollController();
@@ -116,9 +117,80 @@ class _add_invoicState extends State<add_invoic> {
     _controller = ScrollController()..addListener(_loadMore);
   }
 
+  Jalali jalali = Jalali.now();
+  bool finish = false;
+  Future<void> post() async {
+    setState(() {
+      finish = true;
+    });
+    final employeeId = Guid.newGuid;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int userId = prefs.getInt('userId') ?? 0;
+    int systemId = prefs.getInt('systemId') ?? 0;
+    String urlS = prefs.getString('Url') ?? '';
+    var url = '${urlS}InvoiceApi/InvoiceSave';
+    // var k = json.encode(ordDtlModleList);
+    // print(k);
+    var ordermodlemap = ordDtlModleList.map((e) {
+      return {
+        "PId": e.pId.toString(),
+        "Cnt": e.cnt.toString(),
+        "OfferCnt": e.offer.toString(),
+        "Cost": e.cost.toString()
+      };
+    }).toList();
+    String ordermodlej = json.encode(ordermodlemap);
+    print(ordermodlej);
+    var response = await http.post(Uri.parse(url), body: {
+      "Id": '0',
+      "UsrId": userId.toString(),
+      "Acc_System": systemId.toString(),
+      "Exp": '',
+      "Date": '${jalali.year}/${jalali.month}/${jalali.day}',
+      "SanadKind": '5',
+      "CustomerId": customerId.toString(),
+      "GUID": employeeId.toString(),
+      "InvoiceDtls": customer.toString(),
+      "InvoiceDtls": ordermodlej,
+    });
+    print(response.body);
+    final Map<String, dynamic> data = json.decode(response.body);
+    if (data['Meta']['errorCode'] == -1) {
+      setState(() {
+        ordDtlModleList.clear();
+        customer.clear();
+        customerId = 0;
+        jalali = Jalali.now();
+        customerName = '';
+        productId = 0;
+        productName = '';
+        products.clear();
+      });
+      Navigator.pop(context);
+      setState(() {
+        finish = false;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.warning_amber_rounded,color: Colors.yellowAccent,),
+              SizedBox(width: 5,),
+              Text(data['Meta']['message'] == ''
+                  ? 'خطا در ارتباط'
+                  : data['Meta']['message']),
+            ],
+          ),
+              ));
+      setState(() {
+        finish = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Jalali jalali = Jalali.now();
     String selectedDate = Jalali.now().toJalaliDateTime();
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
@@ -132,26 +204,17 @@ class _add_invoicState extends State<add_invoic> {
           // shape: CircularNotchedRectangle(),
           color: Colors.blue,
           child: TextButton(
-            onPressed: () async {
-              Jalali? picked = await showPersianDatePicker(
-                context: context,
-                initialDate: Jalali.now(),
-                firstDate: Jalali(1385, 8),
-                lastDate: Jalali(1450, 9),
-              );
-              var label = picked?.toJalaliDateTime();
-              if (picked != null && picked != selectedDate) {
-                setState(() {
-                  jalali = picked;
-                  label = picked.toJalaliDateTime();
-                });
-              }
-              print(label);
+            onPressed: () {
+              setState(() {
+                post();
+              });
             },
-            child: Text(
-              'ارسال',
-              style: TextStyle(fontSize: 20, color: Colors.white),
-            ),
+            child: finish
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text(
+                    'ارسال',
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
           ),
         ),
         appBar: AppBar(
@@ -275,7 +338,12 @@ class _add_invoicState extends State<add_invoic> {
                       'وضعیت',
                       style: TextStyle(fontSize: 18),
                     ),
-                    ElevatedButton(onPressed: () {}, child: Text('-'))
+                    Link(
+                      target: LinkTarget.defaultTarget,
+                      uri: Uri.parse('http://dotis.ir/'),
+                      builder: (context, followLink) => ElevatedButton(
+                          onPressed: followLink, child: Text('-')),
+                    )
                   ],
                 ),
               ],
@@ -285,22 +353,61 @@ class _add_invoicState extends State<add_invoic> {
               child: ListView.builder(
             itemCount: ordDtlModleList.length,
             itemBuilder: ((context, index) {
-              return Column(
-                children: [
-                  Divider(),
-                  Text(ordDtlModleList[index].pName),
-                  Text('تعداد ${ordDtlModleList[index].cnt.toString()}'),
-                  Text('آفر ${ordDtlModleList[index].offer.toString()}'),
-                  Text(
-                      'مجموع ${(ordDtlModleList[index].cost * ordDtlModleList[index].cnt).toString()}'),
-                  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          ordDtlModleList.removeWhere((element) => ordDtlModleList[index] == element);
-                        });
-                      },
-                      icon: Icon(Icons.delete))
-                ],
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        //Divider(),
+                        Row(
+                          children: [
+                            SizedBox(
+                                width: width *0.74,
+                                child: Text(
+                                  ordDtlModleList[index].pName,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 18),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.visible,
+                                )),
+                            TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    ordDtlModleList.removeWhere((element) =>
+                                        ordDtlModleList[index] == element);
+                                  });
+                                },
+                                child: Icon(Icons.delete)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text('تعداد ${ordDtlModleList[index].cnt.toString()}'),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 6,
+                        ),
+                        Row(
+                          children: [
+                            Text('آفر ${ordDtlModleList[index].offer.toString()}'),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 6,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                                'مجموع ${(ordDtlModleList[index].cost * ordDtlModleList[index].cnt).toString()}'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               );
             }),
           )),
@@ -516,6 +623,7 @@ class _kharidarState extends State<kharidar> {
                                     onTap: () {
                                       setState(() {
                                         customerName = customer[index].name;
+                                        customerId = customer[index].id;
                                         bottomSheet = false;
                                       });
                                       Navigator.pop(context, customer[index]);
@@ -648,6 +756,7 @@ class _FancyFabState extends State<FancyFab>
       child: FloatingActionButton(
         onPressed: () {
           animate();
+          Navigator.push(context, MaterialPageRoute(builder: (context) => Qr()));
         },
         tooltip: 'اسکن با دوربین',
         child: Icon(Icons.qr_code),
@@ -958,8 +1067,8 @@ class _ProductsState extends State<Products> {
                                           builder: (context) {
                                             products.clear();
                                             return SizedBox(
-                                                height: height - 60,
-                                                child: AddProduct());
+                                                height: height - 50,
+                                                child: const AddProduct());
                                           }).then((value) => {
                                             setState(() {
                                               Navigator.pop(context, value);
@@ -1009,7 +1118,7 @@ class AddProduct extends StatefulWidget {
 
 class _AddProductState extends State<AddProduct> {
   TextEditingController costController =
-      TextEditingController(text: cost.toString());
+      TextEditingController(text: cost.toInt().toString());
   TextEditingController cntController = TextEditingController();
   TextEditingController offerController = TextEditingController();
   @override
@@ -1019,7 +1128,6 @@ class _AddProductState extends State<AddProduct> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
-        //mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             width: width / 5,
@@ -1253,7 +1361,7 @@ class _AddProductState extends State<AddProduct> {
                             width: 5,
                           ),
                           SizedBox(
-                              width: (width / 10) * 8,
+                              width: (width / 10) * 8 - 10,
                               child: Text(
                                 productName.split(':')[1],
                                 maxLines: 1,

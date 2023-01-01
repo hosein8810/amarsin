@@ -151,10 +151,12 @@ class _configState extends State<config> {
     );
   }
 
+  String urll = 'http://amarsin.dotis.ir';
   void getData(String code, BuildContext context) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      var url = 'http://amarsin.dotis.ir/api/defapi/GetAppsUrl?_code=$code';
+      var url = '$urll/api/defapi/GetAppsUrl?_code=$code';
+      print(url);
       http.Response response = await http.get(Uri.parse(url));
       setState(() async {
         var dataResponse = json.decode(utf8.decode(response.bodyBytes));
@@ -186,7 +188,7 @@ class _configState extends State<config> {
         }
       });
     } on SocketException catch (e) {
-     //var r = e['message'];
+      //var r = e['message'];
       _showToast(context, 'خطا در ارتباط');
     }
 
@@ -228,13 +230,14 @@ class _configState extends State<config> {
                       height: 45,
                       child: Expanded(
                         child: Material(
+                          // ignore: sort_child_properties_last
                           child: TextField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                                 border: InputBorder.none,
                                 //counterText: "کد فعال ساز",
                                 hintText: "_ _ _ _ _ _",
                                 icon: Padding(
-                                  padding: const EdgeInsets.only(right: 10),
+                                  padding: EdgeInsets.only(right: 10),
                                 )),
                             textAlign: TextAlign.center,
                             controller: editServer,
@@ -254,6 +257,7 @@ class _configState extends State<config> {
                     TextButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          urll = 'http://amarsin.dotis.ir';
                         },
                         child: Text(
                           'بازگردانی',
@@ -264,6 +268,7 @@ class _configState extends State<config> {
                         TextButton(
                             onPressed: () {
                               Navigator.pop(context);
+                              urll = editServer.text;
                             },
                             child: Text(
                               'تایید',
@@ -284,6 +289,4 @@ class _configState extends State<config> {
               ],
             ),
           ));
-
-
 }

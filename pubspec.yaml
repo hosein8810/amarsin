@@ -45,9 +45,10 @@ dependencies:
   flutter_native_splash: ^2.2.9
   intl: ^0.17.0
   persian_datetime_picker: ^2.5.0
-  #flutter_pagination_helper: ^1.0.1
-  #infinite_scroll_pagination: ^3.2.0
-  #flutter_linear_datepicker: ^2.0.4
+  flutter_guid: ^0.3.1
+  gson: ^0.1.4
+  url_launcher: ^6.1.7
+  qr_code_scanner: ^1.0.1
 
 flutter_native_splash:
   background_image: "assets\\StartApp.png"
