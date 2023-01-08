@@ -20,11 +20,14 @@ class _OrderState extends State<Order> {
   List<OrderMSTmodle> orderItem = [];
   Jalali jalali = Jalali.now();
   String selectedDate = Jalali.now().toJalaliDateTime();
-  int _selectedIndex = 0;
-
+  int _selectedIndex = 1;
+  int status = 0;
   List<Color> colors = [const Color(0x00000050)];
   void _onItemsTap(int index) {
     setState(() {
+      if (index >= 0) {
+        status = index - 1;
+      }
       _selectedIndex = index;
     });
   }
@@ -58,9 +61,13 @@ class _OrderState extends State<Order> {
             },
             child: Icon(Icons.add)),
         appBar: AppBar(
-          actions: [IconButton(onPressed: (){setState(() {
-            
-          });}, icon: Icon(Icons.replay))],
+          actions: [
+            IconButton(
+                onPressed: () {
+                  setState(() {});
+                },
+                icon: Icon(Icons.replay))
+          ],
           title: const Text(
             'لیست سفارشات',
             style: TextStyle(color: Colors.white, fontSize: 20),
@@ -108,8 +115,7 @@ class _OrderState extends State<Order> {
                               orderItem[index].Date,
                               orderItem[index].SumTotal.toInt(),
                               orderItem[index].Code,
-                              context
-                              );
+                              context);
                         },
                       ),
                     );
@@ -148,7 +154,7 @@ class _OrderState extends State<Order> {
     int systemId = prefs.getInt('systemId') ?? 0;
     String urlS = prefs.getString('Url') ?? '';
     String url =
-        '${urlS}OrderApi/OrderMstList?usrId=$userId&SystemId=$systemId&CustomerId=0&Status=0&Date=${jalali.year}/${jalali.month}/${jalali.day}';
+        '${urlS}OrderApi/OrderMstList?usrId=$userId&SystemId=$systemId&CustomerId=0&Status=40302070$status&Date=${jalali.year}/${jalali.month}/${jalali.day}';
     http.Response response = await http.get(Uri.parse(url));
     var dataResponse = json.decode(utf8.decode(response.bodyBytes));
     var meta = (dataResponse as Map)["Meta"];
@@ -184,7 +190,8 @@ BottomNavigationBarItem bottomNavigationBarItem(String label, Icon icon) {
   );
 }
 
-Widget lat(String title, int index, String Date, int SumTotal, String Code,BuildContext context) {
+Widget lat(String title, int index, String Date, int SumTotal, String Code,
+    BuildContext context) {
   NumberFormat.NumberFormat myFormat =
       NumberFormat.NumberFormat.decimalPattern('en_us');
   double width = MediaQuery.of(context).size.width;
@@ -211,9 +218,9 @@ Widget lat(String title, int index, String Date, int SumTotal, String Code,Build
                 SizedBox(
                   width: width * 0.89,
                   child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.visible,
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.visible,
                   ),
                 ),
               ],

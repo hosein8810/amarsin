@@ -17,7 +17,7 @@ class Config extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: config(),
-        theme: ThemeData(fontFamily: 'sans_bold'),
+        theme: ThemeData(fontFamily: 'open_sans'),
       ),
     );
   }
@@ -33,119 +33,131 @@ class config extends StatefulWidget {
 class _configState extends State<config> {
   var loginCode = TextEditingController();
   var editServer = TextEditingController();
+  
 
   @override
   Widget build(BuildContext context) {
+  double width = MediaQuery.of(context).size.width;
+  double height = MediaQuery.of(context).size.height;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        body: Column(
-          children: [
-            const SizedBox(
-              height: 45,
-            ),
-            Image.asset('assets\\drawable-hdpi\\Logo.png'),
-            const SizedBox(
-              height: 60,
-            ),
-            Center(
-              child: Container(
-                color: Theme.of(context).backgroundColor,
-                width: MediaQuery.of(context).size.width - 50,
-                height: 230,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      right: 10.0, top: 5.0, left: 10.0, bottom: 0.0),
-                  child: Column(
-                    //crossAxisAlignment: CrossAxisAlignment.center,
-                    //mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        body: SizedBox(
+          width: width,
+          height: height*0.8,
+          child: Expanded(
+            child: ListView(
+              children: [
+                const SizedBox(
+                  height: 45,
+                ),
+                SizedBox(height: width*0.2,width: width*0.2,child: Image.asset('assets\\drawable-hdpi\\Logo.png',)),
+                const SizedBox(
+                  height: 60,
+                ),
+                Center(
+                  child: Container(
+                    color: Theme.of(context).backgroundColor,
+                    width: MediaQuery.of(context).size.width - 50,
+                    height: 230,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          right: 10.0, top: 5.0, left: 10.0, bottom: 0.0),
+                      child: Column(
+                        //crossAxisAlignment: CrossAxisAlignment.center,
+                        //mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            'خوش آمدید',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'خوش آمدید',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 20),
+                              ),
+                              IconButton(
+                                  onPressed: () {
+                                    EditServer_dialog();
+                                  },
+                                  icon: Icon(Icons.settings)),
+                            ],
                           ),
-                          IconButton(
-                              onPressed: () {
-                                EditServer_dialog();
-                              },
-                              icon: Icon(Icons.settings)),
-                        ],
-                      ),
-                      //SizedBox(height: 10,),
-                      Row(
-                        // ignore: prefer_const_literals_to_create_immutables
-                        children: [
-                          const Text('لطفا برای دسترسی بیشتر ..'),
-                        ],
-                      ),
-                      Row(
-                        // ignore: prefer_const_literals_to_create_immutables
-                        children: [
-                          const Text(
-                            'کد فعال سازی نرم افزار را وارد نمایید.',
+                          //SizedBox(height: 10,),
+                          Row(
+                            // ignore: prefer_const_literals_to_create_immutables
+                            children: [
+                              const Text('لطفا برای دسترسی بیشتر ..'),
+                            ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      SizedBox(
-                        height: 45,
-                        child: Expanded(
-                          child: Material(
-                            elevation: 0,
-                            borderRadius: BorderRadius.circular(40),
-                            child: TextField(
-                              decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  //counterText: "کد فعال ساز",
-                                  hintText: "کد فعال ساز",
-                                  icon: Padding(
-                                    padding: EdgeInsets.only(right: 10),
-                                    child: Icon(Icons.lock),
-                                  )),
-                              controller: loginCode,
-                            ),
+                          Row(
+                            // ignore: prefer_const_literals_to_create_immutables
+                            children: [
+                              const Text(
+                                'کد فعال سازی نرم افزار را وارد نمایید.',
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      SizedBox(
-                        height: 43,
-                        width: 110,
-                        child: Material(
-                          elevation: 0,
-                          borderRadius: BorderRadius.circular(40),
-                          color: Colors.blueAccent,
-                          child: InkWell(
-                            onTap: () {
-                              getData(loginCode.text, context);
-                            },
-                            child: const SizedBox(
-                              height: 70,
-                              child: Center(
-                                child: Text(
-                                  'برسی کد',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 20),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          SizedBox(
+                            height: 45,
+                            child: Expanded(
+                              child: Material(
+                                elevation: 0,
+                                borderRadius: BorderRadius.circular(40),
+                                child: TextField(
+                                  decoration: const InputDecoration(
+                                      border: InputBorder.none,
+                                      //counterText: "کد فعال ساز",
+                                      hintText: "کد فعال ساز",
+                                      icon: Padding(
+                                        padding: EdgeInsets.only(right: 10),
+                                        child: Icon(Icons.lock),
+                                      )),
+                                  controller: loginCode,
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      )
-                    ],
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          SizedBox(
+                            height: 43,
+                            width: 110,
+                            child: Material(
+                              elevation: 0,
+                              borderRadius: BorderRadius.circular(40),
+                              color: Colors.blueAccent,
+                              child: InkWell(
+                                onTap: () {
+                                  getData(loginCode.text, context);
+                                },
+                                child: const SizedBox(
+                                  height: 70,
+                                  child: Center(
+                                    child: Text(
+                                      'برسی کد',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                SizedBox(
+                  height: 100,
+                )
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -33,6 +33,7 @@ class _MainPageState extends State<MainPage> {
   List<String> imagelst = [];
   List<MaterialPageRoute> materialPageRoutelst = [];
   Jalali jalali = Jalali.now();
+
   @override
   void initState() {
     super.initState();
@@ -83,17 +84,79 @@ class _MainPageState extends State<MainPage> {
                                 gridDelegate:
                                     const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
-                                  crossAxisSpacing: 12,
-                                  childAspectRatio: 1.5,
+                                  crossAxisSpacing: 10,
+                                  childAspectRatio: 1.35,
                                   mainAxisSpacing: 20,
                                 ),
                                 itemCount: name.length,
                                 itemBuilder: (context, index) {
-                                  return buttons(
-                                      name[index],
-                                      context,
-                                      imagelst[index],
-                                      materialPageRoutelst[index]);
+                                  // return buttons(
+                                  //     name[index],
+                                  //     context,
+                                  //     imagelst[index],
+                                  //     materialPageRoutelst[index]);
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              Future.delayed(Duration.zero, () {
+                                                Navigator.of(context)
+                                                    .push(materialPageRoutelst[
+                                                        index])
+                                                    .then((value) {
+                                                  setState(() {
+                                                    materialPageRoutelst
+                                                        .clear();
+                                                    imagelst.clear();
+                                                    name.clear();
+                                                    idlst.clear();
+                                                    perm = true;
+                                                  });
+                                                });
+                                              });
+                                            },
+                                            child: Card(
+                                              semanticContainer: true,
+                                              clipBehavior:
+                                                  Clip.antiAliasWithSaveLayer,
+                                              //margin: EdgeInsets.all(60),
+                                              shape: RoundedRectangleBorder(
+                                                side: const BorderSide(
+                                                  width: 1,
+                                                  color: Colors.blue,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                  1000000,
+                                                ), //<-- SEE HERE
+                                              ),
+                                              child: Center(
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(16),
+                                                  child: Expanded(
+                                                      child: Image.asset(
+                                                    imagelst[index],
+                                                    height: 70,
+                                                    width: 70,
+                                                  )),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          //SizedBox(height: 2,),
+                                          Text(name[index],
+                                              style: const TextStyle(
+                                                  fontSize: 18,
+                                                  color: Color(0xFF4E4E4E))),
+                                        ],
+                                      ),
+                                      //Container(color: Colors.blue,width: 10,height: 10,)
+                                    ],
+                                  );
                                 },
                               ),
                             );
@@ -282,7 +345,9 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  Row buttons(String name, BuildContext context, String image,
+  void onn() {}
+
+  Widget buttons(String name, BuildContext context, String image,
       MaterialPageRoute materialPageRoute) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -291,10 +356,8 @@ class _MainPageState extends State<MainPage> {
           children: [
             GestureDetector(
               onTap: () {
-                setState(() {
-                  Future.delayed(Duration.zero, () {
-                    Navigator.push(context, materialPageRoute);
-                  });
+                Future.delayed(Duration.zero, () {
+                  Navigator.of(context).push(materialPageRoute);
                 });
               },
               child: Card(
@@ -323,6 +386,7 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
             ),
+            //SizedBox(height: 2,),
             Text(name,
                 style: const TextStyle(fontSize: 18, color: Color(0xFF4E4E4E))),
           ],

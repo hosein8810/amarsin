@@ -1,5 +1,11 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
 
 class Qr extends StatefulWidget {
   const Qr({Key? key}) : super(key: key);
@@ -41,7 +47,7 @@ class _QrState extends State<Qr> {
                 ? () {
                     setState(() async {
                       await controller?.stopCamera();
-                      print(event!.code);
+                      print(event!.code!.substring(2,16));
                       Navigator.pop(context);
                     });
                   }
@@ -137,5 +143,44 @@ class _QrState extends State<Qr> {
     setState(() => this.controller = controller);
     controller.scannedDataStream
         .listen((event) => setState(() => this.event = event));
+  }
+
+  Future<void> get() async{
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int userId = prefs.getInt('userId') ?? 0;
+      int systemId = prefs.getInt('systemId') ?? 0;
+      String urlS = prefs.getString('Url') ?? '';
+      var res = await http.get(Uri.parse(
+          "${urlS}ProductApi/ProductSearch?UsrId=$userId&Barcode=&page=&lastId=0&search=&Acc_System=4&Acc_Year=12&hasStock=false"));
+
+      var fetchedPosts = json.decode(res.body);
+      var meta = (fetchedPosts as Map)["Meta"];
+      var data = (fetchedPosts)["Data"]["result"]['SearchResults'];
+      if (meta['errorCode'] == -1)
+      // ignore: curly_braces_in_flow_control_structures
+      if (fetchedPosts.isNotEmpty) {
+        //setState(() {
+        for (var dataA in data) {
+          // var i = ProductModle(
+          //   dataA['PId'],
+          //   dataA['PName'],
+          //   dataA['Cost'],
+          // );
+          //_posts.addAll(fetchedPosts);
+          //products.add(i);
+          //c.add(i);
+        }
+        //});
+      } else {
+        setState(() {
+         // _hasNextPage = false;
+        });
+      }
+    } catch (err) {
+      if (kDebugMode) {
+        print('Something went wrong');
+      }
+    }
   }
 }

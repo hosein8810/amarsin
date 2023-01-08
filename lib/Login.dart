@@ -15,6 +15,8 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+  double width = MediaQuery.of(context).size.width;
+  double height = MediaQuery.of(context).size.height;
     var userName = TextEditingController();
     var pass = TextEditingController();
     return MediaQuery(
@@ -24,12 +26,12 @@ class Login extends StatelessWidget {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
-            body: Column(
+            body: ListView(
               children: [
                 SizedBox(
                   height: 45,
                 ),
-                Image.asset('assets\\drawable-hdpi\\Logo.png'),
+                SizedBox(height: width*0.2,width: width*0.2,child: Image.asset('assets\\drawable-hdpi\\Logo.png',)),
                 SizedBox(
                   height: 60,
                 ),

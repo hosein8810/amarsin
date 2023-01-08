@@ -118,6 +118,10 @@ flutter:
     - family: sans_bold
       fonts:
         - asset: assets/sansbold.ttf
+        
+    - family: open_sans
+      fonts:
+        - asset: assets\fonts\OpenSans-Italic.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro
